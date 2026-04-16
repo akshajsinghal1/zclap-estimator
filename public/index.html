@@ -179,9 +179,10 @@
       padding: 16px;
       cursor: pointer;
       transition: border-color 0.15s;
+      color: var(--dark);
     }
     .choice-card:hover { border-color: #999; }
-    .choice-card h3 { font-size: 16px; margin-bottom: 6px; }
+    .choice-card h3 { font-size: 16px; margin-bottom: 6px; color: var(--dark); }
     .choice-card p { font-size: 13px; color: var(--mid); line-height: 1.6; }
 
     /* OPTIONS */
@@ -272,7 +273,7 @@
       margin-top: 6px;
       min-height: 16px;
     }
-    .field-note.error { color: #B32222; }
+    .field-note.error { color: #ff6b6b; font-weight: 600; }
     .field-note.success { color: #2D6E2F; }
     .captcha-wrap {
       border: 1px solid var(--border);
@@ -287,6 +288,9 @@
       .opt.selected { background: #3a2720; }
       .captcha-wrap { background: #20252d; }
       .disclaimer { color: #8f98a5; }
+      .choice-card { border-color: #36404a; }
+      .choice-card:hover { border-color: #8f98a5; }
+      .field-note.error { color: #ff7f8a; }
     }
 
     /* RESULTS */
@@ -698,8 +702,8 @@ function renderGate(app) {
     <div class="step-q">Where should we send your estimate?</div>
     <div class="gate-info">Your personalised cost range, timeline and complexity assessment is ready. Enter your details and we'll send it to your inbox with a full PDF summary.</div>
     <div class="fields">
-      <input type="text" id="g-fn" placeholder="First name" value="${S.firstName}" oninput="S.firstName=this.value">
-      <input type="text" id="g-ln" placeholder="Last name" value="${S.lastName}" oninput="S.lastName=this.value">
+      <input type="text" id="g-fn" placeholder="First name" value="${S.firstName}" oninput="onGateFieldInput('firstName', this.value)">
+      <input type="text" id="g-ln" placeholder="Last name" value="${S.lastName}" oninput="onGateFieldInput('lastName', this.value)">
     </div>
     <div class="field-full">
       <input type="email" id="g-em" placeholder="Work email" value="${S.email}" oninput="onEmailInput(this.value)" onblur="validateGateEmail()">
@@ -711,8 +715,8 @@ function renderGate(app) {
       <div id="g-captcha-note" class="${captchaNoteClass}">${S.captcha.validation.message || ''}</div>
     </div>` : ''}
     <div class="fields">
-      <input type="text" id="g-co" placeholder="Company" value="${S.company}" oninput="S.company=this.value">
-      <select id="g-ro" onchange="S.role=this.value">
+      <input type="text" id="g-co" placeholder="Company" value="${S.company}" oninput="onGateFieldInput('company', this.value)">
+      <select id="g-ro" onchange="onGateFieldInput('role', this.value)">
         <option value="">Role</option>
         <option ${S.role==='CIO / IT Director'?'selected':''}>CIO / IT Director</option>
         <option ${S.role==='CDO / Data Governance'?'selected':''}>CDO / Data Governance</option>
@@ -724,9 +728,10 @@ function renderGate(app) {
     </div>
     <div class="nav-row" style="margin-top:20px">
       <button class="btn-back" onclick="goBack()">← Back</button>
-      <button class="btn-next orange" id="gate-btn" onclick="submitGate()">Submit for review →</button>
+      <button class="btn-next orange" id="gate-btn" onclick="submitGate()" ${isGateReadyToSubmit() ? '' : 'disabled'}>Submit for review →</button>
     </div>`;
   renderTurnstileWidget();
+  updateGateSubmitState();
 }
 
 function renderResults(app) {
@@ -766,12 +771,16 @@ function onEmailInput(value) {
     const input = document.getElementById('g-em');
     if (input) input.classList.remove('error');
   }
+  updateGateSubmitState();
 }
 
 function applyEmailValidationUI() {
   const note = document.getElementById('g-em-note');
   const input = document.getElementById('g-em');
-  if (!note || !input) return;
+  if (!note || !input) {
+    updateGateSubmitState();
+    return;
+  }
   const state = S.emailValidation.state;
   note.className = state === 'error' ? 'field-note error'
     : state === 'success' ? 'field-note success'
@@ -779,16 +788,60 @@ function applyEmailValidationUI() {
   note.textContent = S.emailValidation.message || '';
   if (state === 'error') input.classList.add('error');
   else input.classList.remove('error');
+  updateGateSubmitState();
 }
 
 function applyCaptchaValidationUI() {
   const note = document.getElementById('g-captcha-note');
-  if (!note) return;
+  if (!note) {
+    updateGateSubmitState();
+    return;
+  }
   const state = S.captcha.validation.state;
   note.className = state === 'error' ? 'field-note error'
     : state === 'success' ? 'field-note success'
     : 'field-note';
   note.textContent = S.captcha.validation.message || '';
+  updateGateSubmitState();
+}
+
+function onGateFieldInput(key, value) {
+  S[key] = value;
+  const idByKey = {
+    firstName: 'g-fn',
+    lastName: 'g-ln',
+    company: 'g-co',
+    role: 'g-ro',
+  };
+  const fieldId = idByKey[key];
+  if (fieldId) {
+    const el = document.getElementById(fieldId);
+    if (el && String(value || '').trim()) el.classList.remove('error');
+  }
+  updateGateSubmitState();
+}
+
+function hasGateRequiredFields() {
+  return !!(
+    String(S.firstName || '').trim() &&
+    String(S.lastName || '').trim() &&
+    String(S.email || '').trim() &&
+    String(S.company || '').trim() &&
+    String(S.role || '').trim()
+  );
+}
+
+function isGateReadyToSubmit() {
+  if (!hasGateRequiredFields()) return false;
+  if (S.emailValidation.state !== 'success') return false;
+  if (S.captcha.required && !S.captcha.token) return false;
+  return true;
+}
+
+function updateGateSubmitState() {
+  const btn = document.getElementById('gate-btn');
+  if (!btn) return;
+  btn.disabled = S.submitting || !isGateReadyToSubmit();
 }
 
 async function loadPublicConfig() {
@@ -897,11 +950,12 @@ function goBack() {
 }
 
 async function submitGate() {
-  if (!S.firstName || !S.email || !S.company) {
-    ['g-fn','g-em','g-co'].forEach(id => {
+  if (!hasGateRequiredFields()) {
+    ['g-fn','g-ln','g-em','g-co','g-ro'].forEach(id => {
       const el = document.getElementById(id);
-      if (el && !el.value) el.classList.add('error');
+      if (el && !String(el.value || '').trim()) el.classList.add('error');
     });
+    updateGateSubmitState();
     return;
   }
   const emailOk = await validateGateEmail();
@@ -946,10 +1000,10 @@ async function submitGate() {
     const btn = document.getElementById('gate-btn');
     if (btn) {
       btn.textContent = 'Submit for review →';
-      btn.disabled = false;
     }
     S.emailValidation = { state: 'error', message: e.message || 'Unable to submit. Please try again.' };
     applyEmailValidationUI();
+    updateGateSubmitState();
     return;
   }
   S.showGate = false;
