@@ -1,6 +1,10 @@
 const { getSupabaseAdminClient } = require("./_supabase");
 const { validateEmailAddress } = require("./_emailValidation");
-const { verifyTurnstileToken, shouldBypassCaptchaForHost } = require("./_captcha");
+const {
+  verifyTurnstileToken,
+  shouldBypassCaptchaForHost,
+  getTurnstileSecret,
+} = require("./_captcha");
 
 function buildEstimateText(outputs) {
   if (!outputs || typeof outputs !== "object") {
@@ -43,7 +47,8 @@ module.exports = async function handler(req, res) {
     return;
   }
   const host = req.headers.host || "";
-  if (!shouldBypassCaptchaForHost(host)) {
+  const captchaConfigured = !!getTurnstileSecret();
+  if (!shouldBypassCaptchaForHost(host) && captchaConfigured) {
     const remoteIp = req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "";
     const captcha = await verifyTurnstileToken(data.captchaToken, remoteIp);
     if (!captcha.ok) {

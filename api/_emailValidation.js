@@ -2,10 +2,24 @@ const fs = require("fs");
 const path = require("path");
 
 let cachedDomains = null;
+const DEFAULT_BLOCKED_DOMAINS = [
+  "gmail.com",
+  "googlemail.com",
+  "outlook.com",
+  "hotmail.com",
+  "live.com",
+  "yahoo.com",
+  "icloud.com",
+  "aol.com",
+];
 
 function getBlocklistPath() {
+  const projectRoot = path.join(__dirname, "..");
   const candidates = [
+    path.join(projectRoot, "email-domain-blocklist (1).txt"),
+    path.join(projectRoot, "email-domain-blocklist.txt"),
     path.join(process.cwd(), "email-domain-blocklist (1).txt"),
+    path.join(process.cwd(), "email-domain-blocklist.txt"),
     path.join(process.cwd(), "..", "email-domain-blocklist (1).txt"),
   ];
   for (const p of candidates) {
@@ -19,6 +33,7 @@ function loadBlockedDomainSet() {
   const filePath = getBlocklistPath();
   const set = new Set();
   if (!filePath) {
+    for (const domain of DEFAULT_BLOCKED_DOMAINS) set.add(domain);
     cachedDomains = set;
     return set;
   }
