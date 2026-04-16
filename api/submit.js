@@ -20,6 +20,12 @@ function buildEstimateText(outputs) {
 
 function normalizeSource(req, body) {
   const source = (body && body.source) || {};
+  const forwardedFor = req.headers["x-forwarded-for"] || "";
+  const firstForwardedIp = String(forwardedFor).split(",")[0].trim() || null;
+  const city = req.headers["x-vercel-ip-city"] || null;
+  const region = req.headers["x-vercel-ip-country-region"] || null;
+  const country = req.headers["x-vercel-ip-country"] || null;
+  const timezone = req.headers["x-vercel-ip-timezone"] || null;
   return {
     utm_source: source.utm_source || body.utm_source || null,
     utm_medium: source.utm_medium || body.utm_medium || null,
@@ -27,6 +33,11 @@ function normalizeSource(req, body) {
     landing_path: source.landing_path || body.landing_path || null,
     referrer: req.headers.referer || req.headers.referrer || null,
     user_agent: req.headers["user-agent"] || null,
+    ip_address: firstForwardedIp,
+    geo_city: city,
+    geo_region: region,
+    geo_country: country,
+    geo_timezone: timezone,
   };
 }
 
