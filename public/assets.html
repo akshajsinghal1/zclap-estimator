@@ -15,6 +15,15 @@
       --radius: 10px;
       --radius-lg: 14px;
     }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --dark: #f3f4f6;
+        --mid: #b7bdc7;
+        --light-bg: #0f1216;
+        --border: #2a3038;
+        --white: #171c22;
+      }
+    }
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -34,7 +43,17 @@
       top: 0;
       z-index: 10;
     }
-    .brand { text-decoration: none; color: var(--dark); font-weight: 700; letter-spacing: 0.03em; }
+    .brand {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px 8px;
+      min-height: 38px;
+    }
+    .brand img { display: block; height: 26px; width: auto; }
     .nav-links { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .nav-links a {
       text-decoration: none;
@@ -83,34 +102,6 @@
       max-height: 420px;
       background: #111;
     }
-    .player-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .btn {
-      border: 0;
-      background: var(--dark);
-      color: #fff;
-      border-radius: 8px;
-      height: 34px;
-      padding: 0 12px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-    .btn:hover { background: #333; }
-    .speed {
-      height: 34px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0 8px;
-      background: #fff;
-    }
-    .duration {
-      color: var(--mid);
-      font-size: 13px;
-    }
     .topic-list {
       display: grid;
       gap: 10px;
@@ -157,11 +148,22 @@
       .layout { grid-template-columns: 1fr; }
       .topic-list { max-height: unset; }
     }
+    @media (prefers-color-scheme: dark) {
+      .nav-links a:hover { background: #232931; }
+      .topic-item { background: #1a1f26; }
+      .topic-item.active { background: #35251f; }
+      .thumb {
+        border-color: #3a4048;
+        background: linear-gradient(135deg, #2a3139, #222830);
+        color: #8f98a5;
+      }
+      .hint { background: #1b2027; }
+    }
   </style>
 </head>
 <body>
   <nav>
-    <a class="brand" href="/">ZCLAP</a>
+    <a class="brand" href="/" aria-label="ZCLAP home"><img src="/logo.png" alt="ZCLAP" /></a>
     <div class="nav-links">
       <a href="/">Landing</a>
       <a href="/estimate">Estimator</a>
@@ -179,21 +181,8 @@
         <div class="player-wrap">
           <video id="video-player" controls preload="metadata"></video>
         </div>
-        <div class="player-controls">
-          <button class="btn" id="play-btn" type="button">Play</button>
-          <button class="btn" id="pause-btn" type="button">Pause</button>
-          <label for="speed" class="duration">Speed</label>
-          <select class="speed" id="speed">
-            <option value="0.75">0.75x</option>
-            <option value="1" selected>1x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-            <option value="2">2x</option>
-          </select>
-          <span class="duration" id="duration-label">Duration: --:--</span>
-        </div>
         <div class="hint">
-          Video files should be placed under <code>/public/videos/</code> using the filenames shown in each topic card. If a file is missing, the topic still appears in the library list.
+          Video files should be placed under <code>/public/videos/</code> using the filenames shown in each topic card. Playback, speed, and duration are available through the native video controls.
         </div>
       </section>
 
@@ -223,15 +212,6 @@
 
     const topicList = document.getElementById("topic-list");
     const player = document.getElementById("video-player");
-    const durationLabel = document.getElementById("duration-label");
-
-    function formatDuration(seconds) {
-      if (!Number.isFinite(seconds) || seconds <= 0) return "--:--";
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-    }
-
     function setActiveCard(index) {
       const cards = [...document.querySelectorAll(".topic-item")];
       cards.forEach((card, i) => card.classList.toggle("active", i === index));
@@ -244,7 +224,6 @@
       player.src = `/videos/${topic.slug}.mp4`;
       player.poster = "";
       player.load();
-      durationLabel.textContent = "Duration: --:--";
     }
 
     function renderTopics() {
@@ -262,19 +241,6 @@
         item.addEventListener("click", () => loadTopic(Number(item.dataset.index)));
       });
     }
-
-    document.getElementById("play-btn").addEventListener("click", () => player.play().catch(() => {}));
-    document.getElementById("pause-btn").addEventListener("click", () => player.pause());
-    document.getElementById("speed").addEventListener("change", (e) => {
-      player.playbackRate = Number(e.target.value || 1);
-    });
-
-    player.addEventListener("loadedmetadata", () => {
-      durationLabel.textContent = `Duration: ${formatDuration(player.duration)}`;
-    });
-    player.addEventListener("error", () => {
-      durationLabel.textContent = "Duration: file not found";
-    });
 
     renderTopics();
     loadTopic(0);

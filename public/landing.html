@@ -16,6 +16,15 @@
       --radius: 10px;
       --radius-lg: 14px;
     }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --dark: #f3f4f6;
+        --mid: #b7bdc7;
+        --light-bg: #0f1216;
+        --border: #2a3038;
+        --white: #171c22;
+      }
+    }
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -37,10 +46,19 @@
       z-index: 10;
     }
     .brand {
-      font-weight: 700;
-      letter-spacing: 0.03em;
       text-decoration: none;
-      color: var(--dark);
+      display: inline-flex;
+      align-items: center;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px 8px;
+      min-height: 38px;
+    }
+    .brand img {
+      display: block;
+      height: 26px;
+      width: auto;
     }
     .nav-links {
       display: flex;
@@ -73,6 +91,12 @@
     .btn-dark:hover { background: #333; }
     .btn-light { background: #fff; color: var(--orange); }
     .btn-light:hover { opacity: 0.92; }
+    @media (prefers-color-scheme: dark) {
+      .btn-dark { background: #f3f4f6; color: #12161b; }
+      .btn-dark:hover { background: #dfe3e8; }
+      .btn-light { background: #f3f4f6; color: #12161b; }
+      .tag { color: #90bfff; background: #1c2a3a; }
+    }
     .container {
       max-width: 1060px;
       margin: 0 auto;
@@ -239,7 +263,7 @@
 </head>
 <body>
   <nav>
-    <a class="brand" href="/">ZCLAP</a>
+    <a class="brand" href="/" aria-label="ZCLAP home"><img src="/logo.png" alt="ZCLAP" /></a>
     <div class="nav-links">
       <a href="#why">Why fixed price</a>
       <a href="#estimators">Our estimators</a>

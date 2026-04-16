@@ -15,9 +15,17 @@ create table if not exists public.estimator_requests (
   estimate_text text not null default '',
   approved_by text,
   approved_at timestamptz,
+  email_status text not null default 'queued' check (email_status in ('queued', 'not_sent', 'sent', 'undelivered')),
+  email_error text,
   sent_at timestamptz,
   created_at timestamptz not null default now()
 );
+
+alter table public.estimator_requests
+  add column if not exists email_status text not null default 'queued';
+
+alter table public.estimator_requests
+  add column if not exists email_error text;
 
 create index if not exists estimator_requests_status_idx
   on public.estimator_requests (status);

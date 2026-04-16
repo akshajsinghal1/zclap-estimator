@@ -4,11 +4,9 @@
     { "source": "/", "destination": "/landing.html", "permanent": false }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/admin/login", "destination": "/admin-login.html" },
-    { "source": "/admin/login/", "destination": "/admin-login.html" },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin/", "destination": "/admin.html" },
+    { "source": "/api/public-config", "destination": "/api/public-config.js" },
+    { "source": "/api/validate-email", "destination": "/api/validate-email.js" },
+    { "source": "/api/submit", "destination": "/api/submit.js" },
     { "source": "/assets", "destination": "/assets.html" },
     { "source": "/assets/", "destination": "/assets.html" },
     { "source": "/estimate", "destination": "/index.html" },

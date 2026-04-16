@@ -27,6 +27,22 @@
       --radius: 8px;
       --radius-lg: 12px;
     }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --dark: #f3f4f6;
+        --mid: #b7bdc7;
+        --light-bg: #0f1216;
+        --border: #2a3038;
+        --white: #171c22;
+        --green-bg: #173324;
+        --green-txt: #8de0a8;
+        --amber-bg: #3b2a14;
+        --amber-txt: #f7c97d;
+        --red-bg: #3a1d20;
+        --red-txt: #ff9aa2;
+        --blue-info: #90bfff;
+      }
+    }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
@@ -47,7 +63,16 @@
       align-items: center;
       justify-content: space-between;
     }
-    nav img { height: 28px; }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px 8px;
+      min-height: 38px;
+    }
+    .brand-link img { height: 26px; display: block; }
     nav a { font-size: 13px; color: var(--mid); text-decoration: none; }
     nav a:hover { color: var(--dark); }
 
@@ -256,6 +281,13 @@
       padding: 10px;
       margin-bottom: 12px;
     }
+    @media (prefers-color-scheme: dark) {
+      .flow-tab { background: #20252d; }
+      .flow-tab.active { background: #3a2720; }
+      .opt.selected { background: #3a2720; }
+      .captcha-wrap { background: #20252d; }
+      .disclaimer { color: #8f98a5; }
+    }
 
     /* RESULTS */
     .results-anim { animation: fadeUp 0.4s ease; }
@@ -346,7 +378,7 @@
 <body>
 
 <nav>
-  <a href="https://www.zclap.com"><img src="/logo.png" alt="ZCLAP"></a>
+  <a class="brand-link" href="https://www.zclap.com"><img src="/logo.png" alt="ZCLAP"></a>
   <a href="https://www.zclap.com">zclap.com</a>
 </nav>
 
