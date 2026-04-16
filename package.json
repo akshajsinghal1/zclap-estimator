@@ -1,0 +1,11 @@
+{
+  "name": "zclap-mdm-estimator",
+  "version": "1.0.0",
+  "description": "ZCLAP MDM Implementation Cost Estimator",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.103.1",
+    "pdfkit": "^0.14.0",
+    "postmark": "^4.0.2"
+  }
+}

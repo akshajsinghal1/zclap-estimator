@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZCLAP Fixed-Price MDM Services</title>
+  <meta name="description" content="Fixed-price MDM services and estimators for implementation and modernization." />
+  <style>
+    :root {
+      --orange: #e8490f;
+      --dark: #1a1a1a;
+      --mid: #555555;
+      --light-bg: #f7f6f2;
+      --border: #e0ded8;
+      --white: #ffffff;
+      --radius: 10px;
+      --radius-lg: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--light-bg);
+      color: var(--dark);
+      line-height: 1.55;
+    }
+    nav {
+      height: 64px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-decoration: none;
+      color: var(--dark);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .nav-links a {
+      color: var(--mid);
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .nav-links a:hover { color: var(--dark); }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      border-radius: var(--radius);
+      padding: 11px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--orange); color: #fff; }
+    .btn-primary:hover { background: #cc3e0a; }
+    .btn-dark { background: var(--dark); color: #fff; }
+    .btn-dark:hover { background: #333; }
+    .btn-light { background: #fff; color: var(--orange); }
+    .btn-light:hover { opacity: 0.92; }
+    .container {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    section { padding: 28px 0; }
+    .hero { padding: 62px 0 48px; }
+    .eyebrow {
+      color: var(--orange);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(30px, 5vw, 44px);
+      line-height: 1.15;
+      max-width: 780px;
+    }
+    h2 {
+      margin: 0 0 10px;
+      font-size: 30px;
+    }
+    h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    p { margin: 0 0 10px; }
+    .hero p {
+      color: var(--mid);
+      font-size: 17px;
+      max-width: 780px;
+      margin-bottom: 18px;
+    }
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+    }
+    .stat {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+    .stat .val { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+    .stat .lbl { font-size: 13px; color: var(--mid); }
+    .section-intro {
+      margin: 0 0 14px;
+      color: var(--mid);
+      max-width: 860px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .two-cols {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 12px;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+    }
+    .card p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--mid);
+    }
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #185fa5;
+      background: #e9f2ff;
+      border-radius: 999px;
+      padding: 4px 10px;
+      margin-bottom: 8px;
+    }
+    .step-num {
+      color: var(--orange);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 6px;
+    }
+    .link-cta {
+      color: var(--orange);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .link-cta:hover { text-decoration: underline; }
+    .quote {
+      margin-top: 12px;
+      font-size: 15px;
+      color: var(--dark);
+      border-left: 3px solid var(--orange);
+      padding-left: 12px;
+    }
+    .cta-panel {
+      margin-top: 12px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+    }
+    .cta-panel .feature-list {
+      margin-top: 10px;
+      color: var(--dark);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .disclaimer {
+      margin-top: 10px;
+      color: var(--mid);
+      font-size: 12px;
+    }
+    .cta-banner {
+      margin: 18px 0 36px;
+      background: var(--orange);
+      color: #fff;
+      border-radius: var(--radius-lg);
+      padding: 26px 22px;
+      text-align: center;
+    }
+    .cta-banner h3 {
+      margin: 0 0 8px;
+      font-size: 26px;
+    }
+    .cta-banner p {
+      margin: 0 0 14px;
+      color: rgba(255,255,255,0.9);
+    }
+    .cta-banner .sub-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.9);
+    }
+    footer {
+      border-top: 1px solid var(--border);
+      background: var(--white);
+      text-align: center;
+      color: var(--mid);
+      font-size: 12px;
+      padding: 18px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="brand" href="/">ZCLAP</a>
+    <div class="nav-links">
+      <a href="#why">Why fixed price</a>
+      <a href="#estimators">Our estimators</a>
+      <a href="#process">The process</a>
+      <a href="#services">All services</a>
+      <a class="btn btn-dark" href="/estimate">Get your estimate →</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="hero">
+      <div class="eyebrow">Fixed-price Informatica MDM</div>
+      <h1>MDM Implementations and Modernizations delivered at a fixed price. Guaranteed.</h1>
+      <p>
+        Most MDM projects run over time and over budget. ZCLAP has done enough of them to guarantee they won’t.
+        We offer fixed-price services across new Informatica MDM implementations, on-prem to SaaS modernizations,
+        domain expansions, and competitive replacements — and we put that commitment in writing before you sign anything.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/estimate">Get your free estimate →</a>
+        <a class="btn" style="border:1px solid var(--border);background:#fff;color:var(--dark);" href="#process">How it works</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="val">[X]+ implementations</div><div class="lbl">Informatica MDM implementations delivered [Replace with real number]</div></div>
+        <div class="stat"><div class="val">100% fixed price</div><div class="lbl">Fixed-price engagements — no exceptions</div></div>
+        <div class="stat"><div class="val">[X] years</div><div class="lbl">Years of Informatica MDM expertise [Replace with real number]</div></div>
+        <div class="stat"><div class="val">0 overruns</div><div class="lbl">Engagements that ran materially over scope [Replace with real number if different]</div></div>
+      </div>
+    </section>
+
+    <section id="why">
+      <h2>T&amp;M puts the risk on you. We take it instead.</h2>
+      <p class="section-intro">
+        Time and materials is the industry default not because it’s better for clients, but because it’s safer for vendors.
+        When scope grows, hours increase, and the bill follows. Fixed price flips that dynamic — and it requires the vendor
+        to know exactly what they’re doing.
+      </p>
+      <div class="grid-3">
+        <article class="card">
+          <h3>We’ve done this before. Many times.</h3>
+          <p>ZCLAP’s team has delivered Informatica MDM implementations across every major industry and project type. That depth of experience lets us price with confidence — we know what each element of a project costs because we’ve built it dozens of times. Our competitors estimate. We calculate.</p>
+        </article>
+        <article class="card">
+          <h3>Our methodology removes the variables.</h3>
+          <p>Overruns happen when scope is undefined, risks are hidden, and assumptions go undocumented. ZCLAP’s implementation methodology is built to surface every complexity at the start — not midway through a build. Every entity, integration, and hierarchy is scoped precisely before a single line of configuration is written.</p>
+        </article>
+        <article class="card">
+          <h3>Fixed price creates the right incentives.</h3>
+          <p>On a T&amp;M contract, there is no financial incentive for your vendor to be efficient. On a fixed-price contract, there is. ZCLAP’s team is motivated to build right the first time, to make decisions decisively, and to deliver on time. Our business model only works if yours does.</p>
+        </article>
+      </div>
+      <p class="quote">“When a vendor insists on time and materials, ask yourself why they’re not willing to commit to a price. We are — because we’ve earned the right to.” — The ZCLAP approach to MDM delivery</p>
+    </section>
+
+    <section id="estimators">
+      <h2>Your estimate in 3 minutes. No consultant required.</h2>
+      <p class="section-intro">
+        Our online estimators translate your project configuration directly into an indicative fixed-price range — the same logic our team uses to price engagements, made available to you before any conversation takes place. We currently offer estimators for two of our most common project types.
+      </p>
+      <div class="two-cols">
+        <article class="card">
+          <div class="tag">Live now</div>
+          <h3>New MDM implementations</h3>
+          <p>Standing up Informatica MDM from scratch — whether on SaaS or hybrid — with the entities, integrations, hierarchies, and data quality services your business needs. Answer 8 questions and receive your indicative fixed-price range, implementation timeline, and complexity assessment by email.</p>
+          <p style="margin-top:10px;"><a class="link-cta" href="/estimate?type=implementation">Get your implementation estimate →</a></p>
+        </article>
+        <article class="card">
+          <div class="tag">Live now</div>
+          <h3>MDM modernizations</h3>
+          <p>Running an aging Informatica MDM on-prem deployment? Our modernization estimator covers the key complexity drivers — current version, data volumes, integration footprint, and cutover approach — and returns an indicative fixed-price range for your migration to Informatica MDM SaaS.</p>
+          <p style="margin-top:10px;"><a class="link-cta" href="/estimate?type=modernization">Get your modernization estimate →</a></p>
+        </article>
+      </div>
+      <p class="section-intro" style="margin-top:12px;">
+        Not sure which estimator applies to your situation? Use whichever feels closest — or skip straight to a conversation.
+        Our consultants are happy to talk through your project and give you a number without an estimator.
+        <a class="link-cta" href="mailto:hello@zclap.com">Talk to us directly →</a>
+      </p>
+      <div class="cta-panel">
+        <h3>Get your indicative fixed-price estimate</h3>
+        <p>Answer a few questions about your Informatica MDM project and receive a personalised estimate — emailed to you immediately, with a PDF summary included.</p>
+        <div class="feature-list">
+          ✓ Indicative cost range based on your specific configuration<br>
+          ✓ Estimated implementation timeline in weeks<br>
+          ✓ Low / Medium / High complexity rating with explanation<br>
+          ✓ PDF summary emailed to you instantly<br>
+          ✓ No obligation, no sales call required to receive your estimate
+        </div>
+        <p style="margin-top:10px;"><a class="link-cta" href="/estimate">Start the estimator →</a></p>
+        <p class="disclaimer">Takes under 3 minutes. Results are indicative — your ZCLAP consultant will confirm final pricing in a formal proposal.</p>
+      </div>
+    </section>
+
+    <section id="process">
+      <h2>A clear path from first number to signed contract.</h2>
+      <p class="section-intro">The estimator is the start of the conversation, not the end of it. Here’s what happens after you complete it.</p>
+      <div class="steps">
+        <article class="card">
+          <div class="step-num">Step 1</div>
+          <h3>Complete the estimator</h3>
+          <p>Answer questions about your project configuration — entities, integrations, data volumes, and system complexity. The estimator runs the same logic our consultants use to price engagements.</p>
+        </article>
+        <article class="card">
+          <div class="step-num">Step 2</div>
+          <h3>Receive your estimate and review</h3>
+          <p>Your personalised PDF estimate arrives in your inbox immediately — including an indicative cost range, implementation timeline, and a plain-language complexity assessment. Take time to review the numbers with your team before taking the next step.</p>
+        </article>
+        <article class="card">
+          <div class="step-num">Step 3</div>
+          <h3>Schedule a scoping call</h3>
+          <p>When you’re ready, book a 45-minute call with a ZCLAP consultant. We’ll walk through your estimate, answer questions, and capture any project-specific detail the estimator couldn’t account for.</p>
+        </article>
+        <article class="card">
+          <div class="step-num">Step 4</div>
+          <h3>Receive your formal proposal</h3>
+          <p>Within days of your scoping call, you’ll receive a formal fixed-price proposal — a precise scope, a guaranteed price, and a delivery timeline you can plan against.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="services">
+      <h2>Whatever your MDM challenge, we price it upfront.</h2>
+      <p class="section-intro">
+        Our online estimators cover new implementations and MDM modernizations. For domain expansions and competitive replacements — which tend to be more nuanced — we provide fixed-price proposals following a scoping conversation. Every engagement type, one pricing model.
+      </p>
+      <div class="grid-3">
+        <article class="card"><h3>New MDM implementations</h3><p>Tag: Online estimator available<br><br>Standing up Informatica MDM from scratch — whether on SaaS or hybrid — with the entities, integrations, hierarchies, and data quality services your business needs. Scoped precisely. Priced once.<br><br><a class="link-cta" href="/estimate?type=implementation">Get your estimate →</a></p></article>
+        <article class="card"><h3>MDM modernizations</h3><p>Tag: Online estimator available<br><br>Running an aging Informatica MDM on-prem deployment? We migrate your configuration, data, and integrations to Informatica MDM SaaS with zero data loss and a clear cutover plan — at a fixed price that reflects exactly what we find, not what we guess.<br><br><a class="link-cta" href="/estimate?type=modernization">Get your estimate →</a></p></article>
+        <article class="card"><h3>Domain expansions</h3><p>Tag: Fixed price — proposal via conversation<br><br>Your MDM is live but your business has grown. Adding new entity domains — a product domain, a supplier domain, a location hierarchy — requires a closer look at your existing configuration before we can price it accurately. We’ll scope it on a call and give you a fixed number before you commit.<br><br><a class="link-cta" href="mailto:hello@zclap.com">Talk to us →</a></p></article>
+        <article class="card"><h3>Competitive replacements</h3><p>Tag: Fixed price — proposal via conversation<br><br>Replacing a non-Informatica MDM platform — or a custom-built solution that’s become a liability — involves enough project-specific variables that an online estimator can’t do it justice. We’ve done enough of these to scope them accurately. Talk to us and we’ll give you a fixed price.<br><br><a class="link-cta" href="mailto:hello@zclap.com">Talk to us →</a></p></article>
+        <article class="card"><h3>Not sure where you fit?</h3><p>Tell us your situation and we’ll tell you what it costs.<br><br>If your MDM challenge doesn’t fit neatly into one of the categories above, talk to us anyway. ZCLAP’s consultants have seen enough edge cases to scope almost any Informatica MDM engagement — and we’ll always give you a price before we ask you to commit.<br><br><a class="link-cta" href="mailto:hello@zclap.com">Get in touch →</a></p></article>
+      </div>
+    </section>
+
+    <section class="cta-banner">
+      <h3>Your MDM project deserves a price, not a blank check.</h3>
+      <p>Get your indicative fixed-price estimate in under 3 minutes. No consultant, no commitment, no surprises.</p>
+      <a class="btn btn-light" href="/estimate">Start the estimator →</a>
+      <p class="sub-note">Free to use. Results emailed instantly. No obligation.</p>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2026 ZCLAP &bull; www.zclap.com &bull; Data tells the story.
+  </footer>
+</body>
+</html>

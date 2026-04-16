@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "redirects": [
+    { "source": "/", "destination": "/landing.html", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/admin/login", "destination": "/admin-login.html" },
+    { "source": "/admin/login/", "destination": "/admin-login.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin/", "destination": "/admin.html" },
+    { "source": "/assets", "destination": "/assets.html" },
+    { "source": "/assets/", "destination": "/assets.html" },
+    { "source": "/estimate", "destination": "/index.html" },
+    { "source": "/estimate/", "destination": "/index.html" }
+  ]
+}

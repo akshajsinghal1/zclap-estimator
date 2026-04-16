@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZCLAP Estimator Assets</title>
+  <style>
+    :root {
+      --orange: #e8490f;
+      --dark: #1a1a1a;
+      --mid: #555555;
+      --light-bg: #f7f6f2;
+      --border: #e0ded8;
+      --white: #ffffff;
+      --radius: 10px;
+      --radius-lg: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--light-bg);
+      color: var(--dark);
+    }
+    nav {
+      height: 62px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .brand { text-decoration: none; color: var(--dark); font-weight: 700; letter-spacing: 0.03em; }
+    .nav-links { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--mid);
+      font-size: 13px;
+      padding: 6px 8px;
+      border-radius: 6px;
+    }
+    .nav-links a:hover { color: var(--dark); background: #f2f0ec; }
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 16px 36px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 5vw, 40px);
+      line-height: 1.15;
+    }
+    .subtitle {
+      margin: 0 0 18px;
+      color: var(--mid);
+      max-width: 760px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 14px;
+    }
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+    }
+    .player-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #111;
+      margin-bottom: 12px;
+    }
+    video {
+      width: 100%;
+      display: block;
+      max-height: 420px;
+      background: #111;
+    }
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      border: 0;
+      background: var(--dark);
+      color: #fff;
+      border-radius: 8px;
+      height: 34px;
+      padding: 0 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn:hover { background: #333; }
+    .speed {
+      height: 34px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0 8px;
+      background: #fff;
+    }
+    .duration {
+      color: var(--mid);
+      font-size: 13px;
+    }
+    .topic-list {
+      display: grid;
+      gap: 10px;
+      max-height: 560px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .topic-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .topic-item:hover { border-color: #b8b4ac; }
+    .topic-item.active { border-color: var(--orange); background: #fff8f4; }
+    .thumb {
+      border-radius: 8px;
+      border: 1px solid #d4cec5;
+      background: linear-gradient(135deg, #f6f2eb, #efe8dd);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: #9a8f80;
+      font-weight: 700;
+      height: 66px;
+    }
+    .topic-title { margin: 0 0 4px; font-size: 14px; line-height: 1.3; }
+    .topic-meta { margin: 0; font-size: 12px; color: var(--mid); }
+    .hint {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--mid);
+      background: #f9f7f3;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .topic-list { max-height: unset; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="brand" href="/">ZCLAP</a>
+    <div class="nav-links">
+      <a href="/">Landing</a>
+      <a href="/estimate">Estimator</a>
+      <a href="/assets">Assets</a>
+      <a href="https://www.zclap.com">zclap.com</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h1>Estimator Support Assets</h1>
+    <p class="subtitle">Internal/external credibility library for the estimator journey. Select any topic to preview in the player.</p>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="player-wrap">
+          <video id="video-player" controls preload="metadata"></video>
+        </div>
+        <div class="player-controls">
+          <button class="btn" id="play-btn" type="button">Play</button>
+          <button class="btn" id="pause-btn" type="button">Pause</button>
+          <label for="speed" class="duration">Speed</label>
+          <select class="speed" id="speed">
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="2">2x</option>
+          </select>
+          <span class="duration" id="duration-label">Duration: --:--</span>
+        </div>
+        <div class="hint">
+          Video files should be placed under <code>/public/videos/</code> using the filenames shown in each topic card. If a file is missing, the topic still appears in the library list.
+        </div>
+      </section>
+
+      <section class="panel">
+        <div id="topic-list" class="topic-list"></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const topics = [
+      { title: "MDM Implementation Patterns", slug: "mdm-implementation-patterns", icon: "MP" },
+      { title: "Parallel Run Strategies", slug: "parallel-run-strategies", icon: "PR" },
+      { title: "Migrating to SaaS Document Models", slug: "migrating-to-saas-document-models", icon: "SM" },
+      { title: "Designing a 360 That Gets Used", slug: "designing-a-360-that-gets-used", icon: "36" },
+      { title: "Match & Merge Tuning", slug: "match-merge-tuning", icon: "MM" },
+      { title: "Data Quality in MDM", slug: "data-quality-in-mdm", icon: "DQ" },
+      { title: "Governance in MDM", slug: "governance-in-mdm", icon: "GV" },
+      { title: "Integration with IDMC", slug: "integration-with-idmc", icon: "ID" },
+      { title: "Domain Expansion", slug: "domain-expansion", icon: "DE" },
+      { title: "Event-driven vs Batch MDM", slug: "event-driven-vs-batch-mdm", icon: "EV" },
+      { title: "Golden Record Preservation", slug: "golden-record-preservation", icon: "GR" },
+      { title: "Business Outcomes", slug: "business-outcomes", icon: "BO" },
+      { title: "MDM Myths", slug: "mdm-myths", icon: "MY" },
+      { title: "Why ZCLAP Fixed-Price Model", slug: "why-zclap-fixed-price-model", icon: "FP" }
+    ];
+
+    const topicList = document.getElementById("topic-list");
+    const player = document.getElementById("video-player");
+    const durationLabel = document.getElementById("duration-label");
+
+    function formatDuration(seconds) {
+      if (!Number.isFinite(seconds) || seconds <= 0) return "--:--";
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+
+    function setActiveCard(index) {
+      const cards = [...document.querySelectorAll(".topic-item")];
+      cards.forEach((card, i) => card.classList.toggle("active", i === index));
+    }
+
+    function loadTopic(index) {
+      const topic = topics[index];
+      if (!topic) return;
+      setActiveCard(index);
+      player.src = `/videos/${topic.slug}.mp4`;
+      player.poster = "";
+      player.load();
+      durationLabel.textContent = "Duration: --:--";
+    }
+
+    function renderTopics() {
+      topicList.innerHTML = topics.map((topic, i) => `
+        <article class="topic-item ${i === 0 ? "active" : ""}" data-index="${i}">
+          <div class="thumb">${topic.icon}</div>
+          <div>
+            <h3 class="topic-title">${topic.title}</h3>
+            <p class="topic-meta">File: <code>${topic.slug}.mp4</code></p>
+          </div>
+        </article>
+      `).join("");
+
+      [...document.querySelectorAll(".topic-item")].forEach((item) => {
+        item.addEventListener("click", () => loadTopic(Number(item.dataset.index)));
+      });
+    }
+
+    document.getElementById("play-btn").addEventListener("click", () => player.play().catch(() => {}));
+    document.getElementById("pause-btn").addEventListener("click", () => player.pause());
+    document.getElementById("speed").addEventListener("change", (e) => {
+      player.playbackRate = Number(e.target.value || 1);
+    });
+
+    player.addEventListener("loadedmetadata", () => {
+      durationLabel.textContent = `Duration: ${formatDuration(player.duration)}`;
+    });
+    player.addEventListener("error", () => {
+      durationLabel.textContent = "Duration: file not found";
+    });
+
+    renderTopics();
+    loadTopic(0);
+  </script>
+</body>
+</html>
