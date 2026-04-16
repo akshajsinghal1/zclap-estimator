@@ -30,6 +30,22 @@ function normalizeSource(req, body) {
   };
 }
 
+function mapSubmitError(err) {
+  const raw = String((err && err.message) || "");
+  if (raw.includes("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY")) {
+    return {
+      status: 500,
+      code: "supabase_not_configured",
+      message: "Submission service is not configured. Please set Supabase environment variables.",
+    };
+  }
+  return {
+    status: 500,
+    code: "submit_internal_error",
+    message: "Internal server error",
+  };
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
@@ -81,7 +97,17 @@ module.exports = async function handler(req, res) {
 
     if (error) {
       console.error("Supabase insert error:", error);
-      res.status(500).json({ error: "Failed to create request" });
+      const relationMissing =
+        error.code === "42P01" ||
+        String(error.message || "").toLowerCase().includes("estimator_requests");
+      if (relationMissing) {
+        res.status(500).json({
+          error: "Database schema is not initialized. Run supabase/schema.sql in your Supabase project.",
+          code: "supabase_schema_missing",
+        });
+        return;
+      }
+      res.status(500).json({ error: "Failed to create request", code: "supabase_insert_failed" });
       return;
     }
 
@@ -93,6 +119,7 @@ module.exports = async function handler(req, res) {
     });
   } catch (err) {
     console.error("Submit API error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    const mapped = mapSubmitError(err);
+    res.status(mapped.status).json({ error: mapped.message, code: mapped.code });
   }
 };
