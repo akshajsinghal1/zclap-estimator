@@ -417,7 +417,8 @@ const OOTB = ['Organization','Person','Supplier','Contact','Item','Category'];
 const baseSteps = [
   { id:'ootb', type:'multi', q:'Which standard MDM entities will you implement?', hint:'Select all that apply. These are the out-of-the-box Informatica MDM entity types.' },
   { id:'customEnt', type:'number', q:'How many custom entities do you need?', hint:'Custom entities are business objects not covered by the standard set above.', min:0, max:20 },
-  { id:'rels', type:'number', q:'How many relationships are needed?', hint:'Relationships connect records across entities — for example, Organisation to Person, or Supplier to Contact.', min:0, max:30, sub:[{id:'hierarchies',label:'Of which, how many are hierarchies?',min:0,max:20}] },
+  { id:'rels', type:'number', q:'How many relationships are needed?', hint:'Relationships connect records across entities — for example, Organisation to Person, or Supplier to Contact.', min:0, max:30 },
+  { id:'hierarchies', type:'number', q:'How many hierarchies are needed?', hint:'Hierarchies are independent structures — for example, an organisational reporting tree or a product category tree. These are separate from and unrelated to relationships.', min:0, max:20 },
   { id:'sources', type:'number', q:'How many batch source systems will feed MDM?', hint:'A source system provides data to MDM. Count each distinct system separately.', min:0, max:30, sub:[{id:'rtSources',label:'How many real-time / API inbound sources?',min:0,max:20}] },
   { id:'consumers', type:'number', q:'How many batch systems will consume data from MDM?', hint:'A consuming system receives mastered data from MDM in batch.', min:0, max:30, sub:[{id:'rtConsumers',label:'How many real-time API consumers?',min:0,max:20}] },
   { id:'createWkfl', type:'number', q:'For how many entities will stewards create new records in MDM?', hint:'Only count entities where records are originated in MDM — not just edited or merged.', min:0, max:20 },
@@ -439,7 +440,7 @@ function getSteps() {
 
 let S = {
   estimatorType:'',
-  step: 0, showGate: false, showResults: false, submitting: false,
+  step: 0, showEmailGate: false, emailGateReturnToGate: false, showGate: false, showResults: false, submitting: false,
   ootb:[], customEnt:0, rels:2, hierarchies:1, sources:2, rtSources:0,
   consumers:2, rtConsumers:0, createWkfl:1, volume:'', daas:0,
   parallelWeeks:2, legacyHandling:'',
@@ -575,13 +576,14 @@ function calc() {
 function pct() {
   const steps = getSteps();
   if (!S.estimatorType) return 4;
+  if (S.showEmailGate) return 10;
   if (S.showResults) return 100;
   if (S.showGate) return 92;
-  return Math.round(((S.step + 1) / steps.length) * 85);
+  return Math.round(10 + ((S.step + 1) / steps.length) * 75);
 }
 
 function getFlowStage() {
-  if (!S.estimatorType) return 1;
+  if (!S.estimatorType || S.showEmailGate) return 1;
   if (S.showGate || S.showResults) return 3;
   return 2;
 }
@@ -605,6 +607,7 @@ function render() {
   document.getElementById('progress').style.width = pct() + '%';
   const app = document.getElementById('app');
   if (!S.estimatorType) { renderEstimatorChooser(app); return; }
+  if (S.showEmailGate) { renderEmailGate(app); return; }
   if (S.showResults) { renderResults(app); return; }
   if (S.showGate) { renderGate(app); return; }
   renderStep(app);
@@ -632,8 +635,55 @@ function renderEstimatorChooser(app) {
 function chooseEstimator(type) {
   S.estimatorType = type;
   S.step = 0;
+  S.showEmailGate = true;
+  S.emailGateReturnToGate = false;
   S.showGate = false;
   S.showResults = false;
+  render();
+}
+
+function renderEmailGate(app) {
+  document.getElementById('progress-label').textContent = 'Your work email';
+  const noteClass = S.emailValidation.state === 'error' ? 'field-note error'
+    : S.emailValidation.state === 'success' ? 'field-note success'
+    : 'field-note';
+  app.innerHTML = `
+    <div class="step-eyebrow">Before we start</div>
+    <div class="step-q">What's your work email?</div>
+    <div class="step-hint">We'll send your estimate here. We validate your email now so you're not blocked at the end after answering all the questions.</div>
+    <div class="field-full" style="margin-bottom:20px">
+      <input type="email" id="eg-em" placeholder="you@company.com" value="${S.email}"
+        oninput="onEmailGateInput(this.value)"
+        onkeydown="if(event.key==='Enter')proceedFromEmailGate()"
+        autofocus>
+      <div id="eg-em-note" class="${noteClass}">${S.emailValidation.message || ''}</div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goBack()">← Back</button>
+      <button class="btn-next orange" id="eg-btn" onclick="proceedFromEmailGate()" ${S.email.trim() ? '' : 'disabled'}>Continue →</button>
+    </div>`;
+}
+
+function onEmailGateInput(value) {
+  S.email = value;
+  S.emailValidation = { state: 'idle', message: '' };
+  const btn = document.getElementById('eg-btn');
+  if (btn) btn.disabled = !value.trim();
+}
+
+async function proceedFromEmailGate() {
+  const btn = document.getElementById('eg-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Checking…'; }
+  const ok = await validateGateEmail();
+  if (!ok) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Continue →'; }
+    return;
+  }
+  S.showEmailGate = false;
+  if (S.emailGateReturnToGate) {
+    S.emailGateReturnToGate = false;
+    S.showGate = true;
+  }
   render();
 }
 
@@ -689,24 +739,23 @@ function numHtml(id, val) {
 
 function renderGate(app) {
   document.getElementById('progress-label').textContent = 'Almost there';
-  const noteClass = S.emailValidation.state === 'error' ? 'field-note error'
-    : S.emailValidation.state === 'success' ? 'field-note success'
-    : 'field-note';
   const captchaNoteClass = S.captcha.validation.state === 'error' ? 'field-note error'
     : S.captcha.validation.state === 'success' ? 'field-note success'
     : 'field-note';
   const showCaptcha = S.captcha.required || S.captcha.mode === 'optional_dev';
   app.innerHTML = `
     <div class="step-eyebrow">One last step</div>
-    <div class="step-q">Where should we send your estimate?</div>
-    <div class="gate-info">Your personalised cost range, timeline and complexity assessment is ready. Enter your details and we'll send it to your inbox with a full PDF summary.</div>
+    <div class="step-q">Just a few more details</div>
+    <div class="gate-info">Your personalised cost range, timeline and complexity assessment is ready. We'll send the full PDF summary to your inbox once reviewed.</div>
     <div class="fields">
       <input type="text" id="g-fn" placeholder="First name" value="${S.firstName}" oninput="onGateFieldInput('firstName', this.value)">
       <input type="text" id="g-ln" placeholder="Last name" value="${S.lastName}" oninput="onGateFieldInput('lastName', this.value)">
     </div>
     <div class="field-full">
-      <input type="email" id="g-em" placeholder="Work email" value="${S.email}" oninput="onEmailInput(this.value)" onblur="validateGateEmail()">
-      <div id="g-em-note" class="${noteClass}">${S.emailValidation.message || ''}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--light-bg);border:1px solid var(--border);border-radius:var(--radius);height:40px;padding:0 12px;font-size:14px;color:var(--mid);">
+        <span>Sending to: <strong style="color:var(--dark)">${S.email}</strong></span>
+        <button onclick="changeEmail()" style="background:none;border:none;font-size:12px;color:var(--orange);cursor:pointer;font-family:inherit;padding:0;margin-left:12px;">Change</button>
+      </div>
     </div>
     ${showCaptcha ? `
     <div class="captcha-wrap">
@@ -774,8 +823,8 @@ function onEmailInput(value) {
 }
 
 function applyEmailValidationUI() {
-  const note = document.getElementById('g-em-note');
-  const input = document.getElementById('g-em');
+  const note = document.getElementById('eg-em-note') || document.getElementById('g-em-note');
+  const input = document.getElementById('eg-em') || document.getElementById('g-em');
   if (!note || !input) {
     updateGateSubmitState();
     return;
@@ -804,6 +853,14 @@ function applyCaptchaValidationUI() {
   updateGateSubmitState();
 }
 
+function changeEmail() {
+  S.showGate = false;
+  S.showEmailGate = true;
+  S.emailGateReturnToGate = true;
+  S.emailValidation = { state: 'idle', message: '' };
+  render();
+}
+
 function onGateFieldInput(key, value) {
   S[key] = value;
   const idByKey = {
@@ -824,7 +881,6 @@ function hasGateRequiredFields() {
   return !!(
     String(S.firstName || '').trim() &&
     String(S.lastName || '').trim() &&
-    String(S.email || '').trim() &&
     String(S.company || '').trim() &&
     String(S.role || '').trim()
   );
@@ -899,6 +955,7 @@ function renderTurnstileWidget() {
 }
 
 async function validateGateEmail() {
+  if (S.emailValidation.state === 'success') return true;
   const email = String(S.email || '').trim();
   if (!email) {
     S.emailValidation = { state: 'error', message: 'Work email is required.' };
@@ -940,12 +997,9 @@ function goNext() {
 }
 function goBack() {
   if (S.showGate) { S.showGate = false; render(); return; }
-  if (S.step > 0) { S.step--; render(); }
-  else if (S.estimatorType) {
-    S.estimatorType = '';
-    S.step = 0;
-    render();
-  }
+  if (S.showEmailGate) { S.estimatorType = ''; S.showEmailGate = false; S.step = 0; render(); return; }
+  if (S.step > 0) { S.step--; render(); return; }
+  if (S.estimatorType) { S.showEmailGate = true; render(); }
 }
 
 async function submitGate() {
