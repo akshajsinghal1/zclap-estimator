@@ -7,6 +7,7 @@
     { "source": "/api/public-config", "destination": "/api/public-config.js" },
     { "source": "/api/validate-email", "destination": "/api/validate-email.js" },
     { "source": "/api/submit", "destination": "/api/submit.js" },
+    { "source": "/api/pdf", "destination": "/api/pdf.js" },
     { "source": "/assets", "destination": "/assets.html" },
     { "source": "/assets/", "destination": "/assets.html" },
     { "source": "/estimate", "destination": "/index.html" },
