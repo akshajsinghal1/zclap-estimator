@@ -27,6 +27,22 @@ alter table public.estimator_requests
 alter table public.estimator_requests
   add column if not exists email_error text;
 
+-- Admin review columns (added for manual review + fixed-price uplift workflow)
+alter table public.estimator_requests
+  add column if not exists reviewed_inputs jsonb;
+
+alter table public.estimator_requests
+  add column if not exists reviewed_outputs jsonb;
+
+alter table public.estimator_requests
+  add column if not exists contingency_pct numeric;
+
+alter table public.estimator_requests
+  add column if not exists final_low numeric;
+
+alter table public.estimator_requests
+  add column if not exists final_high numeric;
+
 create index if not exists estimator_requests_status_idx
   on public.estimator_requests (status);
 
