@@ -375,6 +375,15 @@
       .metrics { grid-template-columns: 1fr; }
       .choice-grid { grid-template-columns: 1fr; }
     }
+    @media print {
+      nav, footer, .progress-wrap, .flow-tabs, .no-print { display: none !important; }
+      .card { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+      main { padding: 0; }
+      body { background: white; }
+      .hero { display: none; }
+      .kiosk-table td { padding: 5px 0; border-bottom: 1px solid #e0ded8; font-size: 13px; }
+      .kiosk-table td:first-child { color: #555; width: 55%; }
+    }
   </style>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
@@ -387,12 +396,12 @@
 
 <div class="hero">
   <div class="eyebrow">Informatica MDM</div>
-  <h1>What should your MDM implementation cost?</h1>
-  <p>Choose implementation or modernization, answer a few questions, and get an indicative fixed-price estimate in under 3 minutes.</p>
+  <h1>Request a Fixed-Price MDM Quote</h1>
+  <p>Tell us about your project scope and we'll deliver a personalised fixed-price quote within 72 hours.</p>
   <div class="trust">
     <span>Fixed-price guarantee</span>
     <span>No obligation</span>
-    <span>Results emailed instantly</span>
+    <span>Quote within 72 hours</span>
   </div>
 </div>
 
@@ -440,7 +449,7 @@ function getSteps() {
 
 let S = {
   estimatorType:'',
-  step: 0, showEmailGate: false, emailGateReturnToGate: false, showGate: false, showResults: false, submitting: false,
+  step: 0, kiosk: false, showEmailGate: false, emailGateReturnToGate: false, showKioskGate: false, showKioskResults: false, showGate: false, showResults: false, submitting: false,
   ootb:[], customEnt:0, rels:2, hierarchies:1, sources:2, rtSources:0,
   consumers:2, rtConsumers:0, createWkfl:1, volume:'', daas:0,
   parallelWeeks:2, legacyHandling:'',
@@ -577,14 +586,14 @@ function pct() {
   const steps = getSteps();
   if (!S.estimatorType) return 4;
   if (S.showEmailGate) return 10;
-  if (S.showResults) return 100;
-  if (S.showGate) return 92;
+  if (S.showKioskResults || S.showResults) return 100;
+  if (S.showKioskGate || S.showGate) return 92;
   return Math.round(10 + ((S.step + 1) / steps.length) * 75);
 }
 
 function getFlowStage() {
   if (!S.estimatorType || S.showEmailGate) return 1;
-  if (S.showGate || S.showResults) return 3;
+  if (S.showGate || S.showResults || S.showKioskGate || S.showKioskResults) return 3;
   return 2;
 }
 
@@ -595,7 +604,7 @@ function renderFlowTabs() {
   const tabs = [
     { id: 1, label: '1. Project Type' },
     { id: 2, label: '2. Scope Questions' },
-    { id: 3, label: '3. Submission' }
+    { id: 3, label: S.kiosk ? '3. Your Estimate' : '3. Submission' }
   ];
   root.innerHTML = tabs
     .map(t => `<div class="flow-tab ${stage === t.id ? 'active' : ''}">${t.label}</div>`)
@@ -608,6 +617,8 @@ function render() {
   const app = document.getElementById('app');
   if (!S.estimatorType) { renderEstimatorChooser(app); return; }
   if (S.showEmailGate) { renderEmailGate(app); return; }
+  if (S.showKioskResults) { renderKioskResults(app); return; }
+  if (S.showKioskGate) { renderKioskGate(app); return; }
   if (S.showResults) { renderResults(app); return; }
   if (S.showGate) { renderGate(app); return; }
   renderStep(app);
@@ -635,8 +646,10 @@ function renderEstimatorChooser(app) {
 function chooseEstimator(type) {
   S.estimatorType = type;
   S.step = 0;
-  S.showEmailGate = true;
+  S.showEmailGate = S.kiosk ? false : true;
   S.emailGateReturnToGate = false;
+  S.showKioskGate = false;
+  S.showKioskResults = false;
   S.showGate = false;
   S.showResults = false;
   render();
@@ -650,7 +663,7 @@ function renderEmailGate(app) {
   app.innerHTML = `
     <div class="step-eyebrow">Before we start</div>
     <div class="step-q">What's your work email?</div>
-    <div class="step-hint">We'll send your estimate here. We validate your email now so you're not blocked at the end after answering all the questions.</div>
+    <div class="step-hint">We'll send your fixed-price quote here. We check your email now so you're not blocked after answering all the questions.</div>
     <div class="field-full" style="margin-bottom:20px">
       <input type="email" id="eg-em" placeholder="you@company.com" value="${S.email}"
         oninput="onEmailGateInput(this.value)"
@@ -802,6 +815,145 @@ function renderResults(app) {
     </div>
     <div class="disclaimer">No pricing is displayed on this page. Estimates are delivered only via approved email workflow.</div>
   </div>`;
+}
+
+function renderKioskGate(app) {
+  document.getElementById('progress-label').textContent = 'Your details';
+  app.innerHTML = `
+    <div class="step-eyebrow">Almost there</div>
+    <div class="step-q">Who should we prepare this for?</div>
+    <div class="step-hint">Enter your details and we'll show your estimate immediately.</div>
+    <div class="fields">
+      <input type="text" id="kg-fn" placeholder="First name" value="${S.firstName}" oninput="S.firstName=this.value">
+      <input type="text" id="kg-ln" placeholder="Last name" value="${S.lastName}" oninput="S.lastName=this.value">
+    </div>
+    <div class="field-full" style="margin-bottom:10px">
+      <input type="text" id="kg-co" placeholder="Company" value="${S.company}" oninput="S.company=this.value">
+    </div>
+    <div class="field-full" style="margin-bottom:20px">
+      <input type="email" id="kg-em" placeholder="Email (optional)" value="${S.email}" oninput="S.email=this.value">
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goBack()">← Back</button>
+      <button class="btn-next orange" onclick="submitKioskGate()">See Your Estimate →</button>
+    </div>`;
+}
+
+function submitKioskGate() {
+  S.firstName = document.getElementById('kg-fn')?.value || S.firstName;
+  S.lastName = document.getElementById('kg-ln')?.value || S.lastName;
+  S.company = document.getElementById('kg-co')?.value || S.company;
+  S.email = document.getElementById('kg-em')?.value || S.email;
+  S.result = calc();
+  S.showKioskGate = false;
+  S.showKioskResults = true;
+  render();
+  if (S.email || S.firstName || S.company) {
+    fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        estimatorType: S.estimatorType,
+        firstName: S.firstName || 'Kiosk', lastName: S.lastName || 'User',
+        email: S.email || 'kiosk@zclap.com', company: S.company || 'Tradeshow', role: S.role || 'Tradeshow',
+        captchaToken: '',
+        inputs: { ootb: S.ootb, customEnt: S.customEnt, rels: S.rels, hierarchies: S.hierarchies, sources: S.sources, rtSources: S.rtSources, consumers: S.consumers, rtConsumers: S.rtConsumers, createWkfl: S.createWkfl, volume: S.volume, daas: S.daas, parallelWeeks: S.parallelWeeks, legacyHandling: S.legacyHandling },
+        outputs: S.result
+      })
+    }).catch(() => {});
+  }
+}
+
+function renderKioskResults(app) {
+  document.getElementById('progress-label').textContent = 'Your estimate';
+  const r = S.result || calc();
+  const typeLabel = S.estimatorType === 'modernization' ? 'MDM Modernization Estimate' : 'MDM Implementation Estimate';
+  const nameStr = [S.firstName, S.lastName].filter(Boolean).join(' ') || 'Prospective Client';
+  const volLabels = { 'Less than 1 million': 'Less than 1M records', '1 million to 10 million': '1M – 10M records', '10 million to 80 million': '10M – 80M records', 'Over 80 million': 'Over 80M records' };
+  const migOpts = { 'Load by business ID': 'Load by Business ID (Option 1)', 'Merge by old ID': 'Merge by Old ID (Option 2)', 'New match/merge': 'New Match/Merge (Option 3)' };
+  const td = (a, b) => `<tr><td style="padding:5px 0;border-bottom:1px solid var(--border);color:var(--mid);width:55%">${a}</td><td style="padding:5px 0;border-bottom:1px solid var(--border);">${b}</td></tr>`;
+  const scopeRows = [
+    S.estimatorType === 'modernization' ? td('Parallel testing', S.parallelWeeks + ' weeks') : '',
+    S.estimatorType === 'modernization' ? td('Legacy record handling', migOpts[S.legacyHandling] || S.legacyHandling || '—') : '',
+    td('OOTB entities', S.ootb.length ? S.ootb.join(', ') : 'None'),
+    td('Custom entities', S.customEnt),
+    td('Relationships', S.rels),
+    td('Hierarchies', S.hierarchies),
+    td('Batch source systems', S.sources),
+    td('Real-time inbound sources', S.rtSources),
+    td('Batch consumers', S.consumers),
+    td('Real-time consumers', S.rtConsumers),
+    td('Entities with create workflows', S.createWkfl),
+    td('Source record volume', volLabels[S.volume] || S.volume || '—'),
+    td('Data cleansing / enrichment services', S.daas),
+  ].filter(Boolean).join('');
+
+  app.innerHTML = `<div class="results-anim" id="kiosk-estimate">
+    <div class="result-hero">
+      <div class="result-eyebrow" style="font-size:13px;letter-spacing:0.05em;">${typeLabel.toUpperCase()}</div>
+      <div style="font-size:13px;color:var(--mid);margin-bottom:16px;">Prepared for <strong>${nameStr}</strong>${S.company ? ' · ' + S.company : ''}</div>
+      <div class="result-eyebrow">INDICATIVE FIXED-PRICE RANGE</div>
+      <div class="result-cost">${r.lowFmt} – ${r.highFmt}</div>
+      <div class="result-sub">${r.totalWks}-week estimated delivery</div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Timeline</div><div class="metric-val">${r.totalWks} wks</div></div>
+      <div class="metric"><div class="metric-label">Complexity</div><div class="metric-val" style="font-size:16px;text-transform:capitalize;">${r.risk}</div></div>
+    </div>
+
+    <div class="risk-card ${r.risk}" style="margin-bottom:20px;">
+      <div class="risk-badge">${r.risk.toUpperCase()} COMPLEXITY</div>
+      <div class="risk-title">${r.riskTitle}</div>
+      <div class="risk-desc">${r.riskDesc}</div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--mid);margin-bottom:10px;">Project Scope</div>
+      <table class="kiosk-table" style="width:100%;border-collapse:collapse;">${scopeRows}</table>
+    </div>
+
+    <div style="background:var(--light-bg);border-radius:8px;padding:16px 18px;margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--mid);margin-bottom:10px;">Estimate Assumptions</div>
+      <ul style="margin:0;padding-left:18px;color:var(--mid);font-size:13px;line-height:1.8;">
+        <li>Workflow will use out-of-the-box options — one step, two steps, or four steps</li>
+        <li>Reference data will be managed in Reference 360 via the Data Stewards interface</li>
+        <li>Real-time sources must be able to call MDM REST APIs</li>
+        <li>Real-time targets must have REST APIs which can be called to push data. For inserting new records, real-time target must respond synchronously with the new record ID</li>
+        <li>Batch sources must have a way to identify changes since last extract (CDC process, last update date, etc.)</li>
+        <li>MDM data will be egressed as relational-style database tables for batch targets to consume</li>
+      </ul>
+      <div style="margin-top:10px;font-size:12px;color:var(--mid);">Any changes to the above assumptions may require a revised estimate.</div>
+    </div>
+
+    <div class="disclaimer" style="margin-bottom:20px;">This is an indicative estimate only. Final pricing is subject to detailed scoping and ZCLAP review. © ${new Date().getFullYear()} ZCLAP · zclap.com</div>
+
+    <div class="nav-row no-print">
+      <button class="btn-back" onclick="goBack()">← Back</button>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-next" onclick="window.print()" style="background:var(--mid)">Print / Save PDF</button>
+        <button class="btn-next orange" onclick="startNewEstimate()">New Estimate →</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function startNewEstimate() {
+  const preserved = { kiosk: S.kiosk, captcha: S.captcha };
+  S = {
+    estimatorType:'', step:0, kiosk:preserved.kiosk,
+    showEmailGate:false, emailGateReturnToGate:false,
+    showKioskGate:false, showKioskResults:false,
+    showGate:false, showResults:false, submitting:false,
+    ootb:[], customEnt:0, rels:2, hierarchies:0, sources:2, rtSources:0,
+    consumers:2, rtConsumers:0, createWkfl:0, volume:'', daas:0,
+    parallelWeeks:2, legacyHandling:'',
+    firstName:'', lastName:'', email:'', company:'', role:'',
+    emailValidation: { state:'idle', message:'' },
+    captcha: preserved.captcha,
+    result: null
+  };
+  render();
 }
 
 function toggleMulti(val) {
@@ -993,13 +1145,22 @@ function changeNum(id, d) {
 function goNext() {
   const steps = getSteps();
   if (S.step < steps.length - 1) { S.step++; render(); }
-  else { S.showGate = true; render(); }
+  else {
+    if (S.kiosk) { S.showKioskGate = true; }
+    else { S.showGate = true; }
+    render();
+  }
 }
 function goBack() {
+  if (S.showKioskResults) { S.showKioskResults = false; S.showKioskGate = true; render(); return; }
+  if (S.showKioskGate) { S.showKioskGate = false; render(); return; }
   if (S.showGate) { S.showGate = false; render(); return; }
   if (S.showEmailGate) { S.estimatorType = ''; S.showEmailGate = false; S.step = 0; render(); return; }
   if (S.step > 0) { S.step--; render(); return; }
-  if (S.estimatorType) { S.showEmailGate = true; render(); }
+  if (S.estimatorType) {
+    if (S.kiosk) { S.estimatorType = ''; S.step = 0; render(); }
+    else { S.showEmailGate = true; render(); }
+  }
 }
 
 async function submitGate() {
@@ -1068,6 +1229,7 @@ async function initApp() {
   await loadPublicConfig();
   try {
     const params = new URLSearchParams(window.location.search || '');
+    S.kiosk = (params.get('mode') || '').toLowerCase() === 'kiosk';
     const requestedType = (params.get('type') || '').toLowerCase();
     if (requestedType === 'implementation' || requestedType === 'modernization') {
       S.estimatorType = requestedType;
