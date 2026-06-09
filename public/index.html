@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MDM Implementation Estimator — ZCLAP</title>
+  <title>MDM Implementation Estimator â€” ZCLAP</title>
   <meta name="description" content="Get an indicative fixed-price estimate for your Informatica MDM implementation in under 3 minutes.">
-  <meta property="og:title" content="MDM Implementation Estimator — ZCLAP">
+  <meta property="og:title" content="MDM Implementation Estimator â€” ZCLAP">
   <meta property="og:description" content="Get an indicative fixed-price estimate for your Informatica MDM implementation in under 3 minutes.">
   <meta property="og:image" content="/logo.png">
   <meta property="og:type" content="website">
@@ -117,7 +117,7 @@
       gap: 20px;
       flex-wrap: wrap;
     }
-    .hero .trust span::before { content: '✓ '; color: var(--orange); font-weight: 600; }
+    .hero .trust span::before { content: 'âœ“ '; color: var(--orange); font-weight: 600; }
 
     /* MAIN CARD */
     main {
@@ -426,11 +426,11 @@ const OOTB = ['Organization','Person','Supplier','Contact','Item','Category'];
 const baseSteps = [
   { id:'ootb', type:'multi', q:'Which standard MDM entities will you implement?', hint:'Select all that apply. These are the out-of-the-box Informatica MDM entity types.' },
   { id:'customEnt', type:'number', q:'How many custom entities do you need?', hint:'Custom entities are business objects not covered by the standard set above.', min:0, max:20 },
-  { id:'rels', type:'number', q:'How many relationships are needed?', hint:'Relationships connect records across entities — for example, Organisation to Person, or Supplier to Contact.', min:0, max:30 },
-  { id:'hierarchies', type:'number', q:'How many hierarchies are needed?', hint:'Hierarchies are independent structures — for example, an organisational reporting tree or a product category tree. These are separate from and unrelated to relationships.', min:0, max:20 },
+  { id:'rels', type:'number', q:'How many relationships are needed?', hint:'Relationships connect records across entities â€” for example, Organisation to Person, or Supplier to Contact.', min:0, max:30 },
+  { id:'hierarchies', type:'number', q:'How many hierarchies are needed?', hint:'Hierarchies are independent structures â€” for example, an organisational reporting tree or a product category tree. These are separate from and unrelated to relationships.', min:0, max:20 },
   { id:'sources', type:'number', q:'How many batch source systems will feed MDM?', hint:'A source system provides data to MDM. Count each distinct system separately.', min:0, max:30, sub:[{id:'rtSources',label:'How many real-time / API inbound sources?',min:0,max:20}] },
   { id:'consumers', type:'number', q:'How many batch systems will consume data from MDM?', hint:'A consuming system receives mastered data from MDM in batch.', min:0, max:30, sub:[{id:'rtConsumers',label:'How many real-time API consumers?',min:0,max:20}] },
-  { id:'createWkfl', type:'number', q:'For how many entities will stewards create new records in MDM?', hint:'Only count entities where records are originated in MDM — not just edited or merged.', min:0, max:20 },
+  { id:'createWkfl', type:'number', q:'For how many entities will stewards create new records in MDM?', hint:'Only count entities where records are originated in MDM â€” not just edited or merged.', min:0, max:20 },
   { id:'volume', type:'single', q:'What is the total source record volume across all entities?', hint:'Add up records from all source systems for all entities combined.', opts:['Less than 1 million','1 million to 10 million','10 million to 80 million','Over 80 million'] },
   { id:'daas', type:'number', q:'How many data cleansing or enrichment services are needed?', hint:'Examples: postal address verification, D&B enrichment, email or phone validation.', min:0, max:10 }
 ];
@@ -516,20 +516,23 @@ function calc() {
   const rtInHrs = rtIn * totalEnt * 24;
   const rtOutHrs = rtOut * totalEnt * 32;
   const circlebacks = (createWkfl > 0 ? 1 : 0) * totalEnt * 40;
-  const daasHrs = daas * 40;
+  const searchBeforeCreate = createWkfl > 0 ? 40 : 0;
+  const daasHrs = daas * 60;
 
   // Profile, match, and UI/workflow terms adjusted to match workbook structure better.
   const profHrs = totalEnt * (bIn + rtIn) * 8;
-  const custBuild = custN * 8;
+  const custBuild = custN * 12;
+  const ootbAdjust = ootbN * 8;
+  const dqFuncHrs = totalEnt * 10 * 2;
   const matchHrs = totalEnt * matchFactor * 32;
   const layoutAndWorkflowHrs = (totalEnt * 1 * 6) + (totalEnt * 2 * 6) + (createWkfl * 10);
 
   const cdiHrs = entInHrs + relInHrs + hierInHrs + entOutHrs + relOutHrs + hierOutHrs + rtInHrs + rtOutHrs;
-  const buildHrs = cdiHrs + circlebacks + daasHrs + profHrs + custBuild + matchHrs + layoutAndWorkflowHrs;
+  const buildHrs = cdiHrs + circlebacks + searchBeforeCreate + daasHrs + profHrs + custBuild + ootbAdjust + dqFuncHrs + matchHrs + layoutAndWorkflowHrs;
 
   const buildWks = Math.max(4, Math.ceil(buildHrs / 160));
-  const designAndReqWks = Math.max(2, Math.round((buildHrs * (isModernization ? 0.30 : 0.35)) / 120));
-  const testWks = Math.max(1, Math.round((buildHrs * (volScore < 2 ? 0.15 : 0.20)) / 160));
+  const designAndReqWks = Math.max(2, Math.round((buildHrs * 0.30) / 120));
+  const testWks = Math.max(isModernization ? 3 : 2, Math.round((buildHrs * (volScore < 2 ? 0.10 : 0.15)) / 160));
   const cutoverWks = 1;
   const parallelWeeks = isModernization ? Math.max(2, Number(S.parallelWeeks || 2)) : 0;
   const totalWks = designAndReqWks + buildWks + testWks + cutoverWks + parallelWeeks;
@@ -672,8 +675,8 @@ function renderEmailGate(app) {
       <div id="eg-em-note" class="${noteClass}">${S.emailValidation.message || ''}</div>
     </div>
     <div class="nav-row">
-      <button class="btn-back" onclick="goBack()">← Back</button>
-      <button class="btn-next orange" id="eg-btn" onclick="proceedFromEmailGate()" ${S.email.trim() ? '' : 'disabled'}>Continue →</button>
+      <button class="btn-back" onclick="goBack()">â† Back</button>
+      <button class="btn-next orange" id="eg-btn" onclick="proceedFromEmailGate()" ${S.email.trim() ? '' : 'disabled'}>Continue â†’</button>
     </div>`;
 }
 
@@ -686,10 +689,10 @@ function onEmailGateInput(value) {
 
 async function proceedFromEmailGate() {
   const btn = document.getElementById('eg-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Checking…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Checkingâ€¦'; }
   const ok = await validateGateEmail();
   if (!ok) {
-    if (btn) { btn.disabled = false; btn.textContent = 'Continue →'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Continue â†’'; }
     return;
   }
   S.showEmailGate = false;
@@ -734,9 +737,9 @@ function renderStep(app) {
   const canGo = st.type === 'multi' ? S.ootb.length > 0 : st.type === 'single' ? S[st.id] !== '' : true;
   const canGoBack = S.step > 0 || !!S.estimatorType;
   h += `<div class="nav-row">
-    ${canGoBack ? `<button class="btn-back" onclick="goBack()">← Back</button>` : '<span></span>'}
+    ${canGoBack ? `<button class="btn-back" onclick="goBack()">â† Back</button>` : '<span></span>'}
     <button class="btn-next ${isLast?'orange':''}" onclick="goNext()" ${canGo?'':'disabled'}>
-      ${isLast ? 'Continue to submission →' : 'Continue →'}
+      ${isLast ? 'Continue to submission â†’' : 'Continue â†’'}
     </button>
   </div>`;
   app.innerHTML = h;
@@ -744,7 +747,7 @@ function renderStep(app) {
 
 function numHtml(id, val) {
   return `<div class="num-wrap">
-    <button class="num-btn" onclick="changeNum('${id}',-1)">−</button>
+    <button class="num-btn" onclick="changeNum('${id}',-1)">âˆ’</button>
     <span class="num-val" id="nv-${id}">${val}</span>
     <button class="num-btn" onclick="changeNum('${id}',1)">+</button>
   </div>`;
@@ -788,8 +791,8 @@ function renderGate(app) {
       </select>
     </div>
     <div class="nav-row" style="margin-top:20px">
-      <button class="btn-back" onclick="goBack()">← Back</button>
-      <button class="btn-next orange" id="gate-btn" onclick="submitGate()" ${isGateReadyToSubmit() ? '' : 'disabled'}>Submit for review →</button>
+      <button class="btn-back" onclick="goBack()">â† Back</button>
+      <button class="btn-next orange" id="gate-btn" onclick="submitGate()" ${isGateReadyToSubmit() ? '' : 'disabled'}>Submit for review â†’</button>
     </div>`;
   renderTurnstileWidget();
   updateGateSubmitState();
@@ -811,7 +814,7 @@ function renderResults(app) {
     <div class="cta-block">
       <h3>Need help before email delivery?</h3>
       <p>You can still reach the team directly if your project has urgent constraints or timeline dependencies.</p>
-      <button class="btn-cta" onclick="window.location.href='mailto:info@zclap.com?subject=MDM%20Estimator%20Follow-up'">Contact ZCLAP →</button>
+      <button class="btn-cta" onclick="window.location.href='mailto:info@zclap.com?subject=MDM%20Estimator%20Follow-up'">Contact ZCLAP â†’</button>
     </div>
     <div class="disclaimer">No pricing is displayed on this page. Estimates are delivered only via approved email workflow.</div>
   </div>`;
@@ -834,8 +837,8 @@ function renderKioskGate(app) {
       <input type="email" id="kg-em" placeholder="Email (optional)" value="${S.email}" oninput="S.email=this.value">
     </div>
     <div class="nav-row">
-      <button class="btn-back" onclick="goBack()">← Back</button>
-      <button class="btn-next orange" onclick="submitKioskGate()">See Your Estimate →</button>
+      <button class="btn-back" onclick="goBack()">â† Back</button>
+      <button class="btn-next orange" onclick="submitKioskGate()">See Your Estimate â†’</button>
     </div>`;
 }
 
@@ -869,12 +872,12 @@ function renderKioskResults(app) {
   const r = S.result || calc();
   const typeLabel = S.estimatorType === 'modernization' ? 'MDM Modernization Estimate' : 'MDM Implementation Estimate';
   const nameStr = [S.firstName, S.lastName].filter(Boolean).join(' ') || 'Prospective Client';
-  const volLabels = { 'Less than 1 million': 'Less than 1M records', '1 million to 10 million': '1M – 10M records', '10 million to 80 million': '10M – 80M records', 'Over 80 million': 'Over 80M records' };
+  const volLabels = { 'Less than 1 million': 'Less than 1M records', '1 million to 10 million': '1M â€“ 10M records', '10 million to 80 million': '10M â€“ 80M records', 'Over 80 million': 'Over 80M records' };
   const migOpts = { 'Load by business ID': 'Load by Business ID (Option 1)', 'Merge by old ID': 'Merge by Old ID (Option 2)', 'New match/merge': 'New Match/Merge (Option 3)' };
   const td = (a, b) => `<tr><td style="padding:5px 0;border-bottom:1px solid var(--border);color:var(--mid);width:55%">${a}</td><td style="padding:5px 0;border-bottom:1px solid var(--border);">${b}</td></tr>`;
   const scopeRows = [
     S.estimatorType === 'modernization' ? td('Parallel testing', S.parallelWeeks + ' weeks') : '',
-    S.estimatorType === 'modernization' ? td('Legacy record handling', migOpts[S.legacyHandling] || S.legacyHandling || '—') : '',
+    S.estimatorType === 'modernization' ? td('Legacy record handling', migOpts[S.legacyHandling] || S.legacyHandling || 'â€”') : '',
     td('OOTB entities', S.ootb.length ? S.ootb.join(', ') : 'None'),
     td('Custom entities', S.customEnt),
     td('Relationships', S.rels),
@@ -884,16 +887,16 @@ function renderKioskResults(app) {
     td('Batch consumers', S.consumers),
     td('Real-time consumers', S.rtConsumers),
     td('Entities with create workflows', S.createWkfl),
-    td('Source record volume', volLabels[S.volume] || S.volume || '—'),
+    td('Source record volume', volLabels[S.volume] || S.volume || 'â€”'),
     td('Data cleansing / enrichment services', S.daas),
   ].filter(Boolean).join('');
 
   app.innerHTML = `<div class="results-anim" id="kiosk-estimate">
     <div class="result-hero">
       <div class="result-eyebrow" style="font-size:13px;letter-spacing:0.05em;">${typeLabel.toUpperCase()}</div>
-      <div style="font-size:13px;color:var(--mid);margin-bottom:16px;">Prepared for <strong>${nameStr}</strong>${S.company ? ' · ' + S.company : ''}</div>
+      <div style="font-size:13px;color:var(--mid);margin-bottom:16px;">Prepared for <strong>${nameStr}</strong>${S.company ? ' Â· ' + S.company : ''}</div>
       <div class="result-eyebrow">INDICATIVE FIXED-PRICE RANGE</div>
-      <div class="result-cost">${r.lowFmt} – ${r.highFmt}</div>
+      <div class="result-cost">${r.lowFmt} â€“ ${r.highFmt}</div>
       <div class="result-sub">${r.totalWks}-week estimated delivery</div>
     </div>
 
@@ -916,7 +919,7 @@ function renderKioskResults(app) {
     <div style="background:var(--light-bg);border-radius:8px;padding:16px 18px;margin-bottom:20px;">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--mid);margin-bottom:10px;">Estimate Assumptions</div>
       <ul style="margin:0;padding-left:18px;color:var(--mid);font-size:13px;line-height:1.8;">
-        <li>Workflow will use out-of-the-box options — one step, two steps, or four steps</li>
+        <li>Workflow will use out-of-the-box options â€” one step, two steps, or four steps</li>
         <li>Reference data will be managed in Reference 360 via the Data Stewards interface</li>
         <li>Real-time sources must be able to call MDM REST APIs</li>
         <li>Real-time targets must have REST APIs which can be called to push data. For inserting new records, real-time target must respond synchronously with the new record ID</li>
@@ -926,13 +929,13 @@ function renderKioskResults(app) {
       <div style="margin-top:10px;font-size:12px;color:var(--mid);">Any changes to the above assumptions may require a revised estimate.</div>
     </div>
 
-    <div class="disclaimer" style="margin-bottom:20px;">This is an indicative estimate only. Final pricing is subject to detailed scoping and ZCLAP review. © ${new Date().getFullYear()} ZCLAP · zclap.com</div>
+    <div class="disclaimer" style="margin-bottom:20px;">This is an indicative estimate only. Final pricing is subject to detailed scoping and ZCLAP review. Â© ${new Date().getFullYear()} ZCLAP Â· zclap.com</div>
 
     <div class="nav-row no-print">
-      <button class="btn-back" onclick="goBack()">← Back</button>
+      <button class="btn-back" onclick="goBack()">â† Back</button>
       <div style="display:flex;gap:10px;">
         <button class="btn-next" onclick="window.print()" style="background:var(--mid)">Print / Save PDF</button>
-        <button class="btn-next orange" onclick="startNewEstimate()">New Estimate →</button>
+        <button class="btn-next orange" onclick="startNewEstimate()">New Estimate â†’</button>
       </div>
     </div>
   </div>`;
@@ -1213,7 +1216,7 @@ async function submitGate() {
     S.submitting = false;
     const btn = document.getElementById('gate-btn');
     if (btn) {
-      btn.textContent = 'Submit for review →';
+      btn.textContent = 'Submit for review â†’';
     }
     S.emailValidation = { state: 'error', message: e.message || 'Unable to submit. Please try again.' };
     applyEmailValidationUI();
@@ -1247,3 +1250,4 @@ initApp();
 </script>
 </body>
 </html>
+
